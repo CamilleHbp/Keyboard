@@ -54,6 +54,7 @@ fun AboutScreen(
     val items = listOf(
         SettingsWithoutKey.APP,
         SettingsWithoutKey.VERSION,
+        "app_check_updates",
         SettingsWithoutKey.LICENSE,
         SettingsWithoutKey.HIDDEN_FEATURES,
         SettingsWithoutKey.GITHUB_WIKI,
@@ -91,6 +92,19 @@ fun createAboutSettings(context: Context) = listOf(
                 if (count < 5) return@Preference
                 prefs.edit { putBoolean(DebugSettings.PREF_SHOW_DEBUG_SETTINGS, true) }
                 Toast.makeText(ctx, R.string.prefs_debug_settings_enabled, Toast.LENGTH_LONG).show()
+            },
+            icon = R.drawable.ic_settings_about_version
+        )
+    },
+    Setting(context, "app_check_updates", R.string.app_check_updates) {
+        val context = LocalContext.current
+        Preference(
+            name = it.title,
+            description = stringResource(R.string.app_installed_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+            onClick = {
+                var owner = context
+                while (owner is android.content.ContextWrapper && owner !is android.app.Activity) owner = owner.baseContext
+                (owner as? android.app.Activity)?.let { studio.camille.updater.CamilleUpdater.checkNow(it) }
             },
             icon = R.drawable.ic_settings_about_version
         )

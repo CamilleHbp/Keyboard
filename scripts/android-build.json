@@ -1,0 +1,34 @@
+{
+  "tasks": [
+    ":app:assembleDebug",
+    ":app:assembleRelease"
+  ],
+  "clean_tasks": [
+    ":app:clean"
+  ],
+  "required_variants": {
+    "app": [
+      "debug",
+      "release"
+    ]
+  },
+  "source_globs": [
+    "app/src/main/**",
+    "app/src/debug/**",
+    "app/src/release/**",
+    "app/build.gradle.kts",
+    "app/*.pro",
+    "build.gradle.kts",
+    "settings.gradle",
+    "gradle.properties",
+    "gradle/**",
+    "gradlew",
+    "gradlew.bat",
+    "signing.properties",
+    ".keys/hellboard-release.jks",
+    "app/libs/**"
+  ],
+  "gradle_args": [
+    "--max-workers=4"
+  ]
+}

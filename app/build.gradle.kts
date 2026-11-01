@@ -10,11 +10,12 @@ android {
     compileSdk = 37
 
     defaultConfig {
+        resValue("string", "camille_update_app_id", "hellboard")
         applicationId = "helium314.keyboard"
         minSdk = 21
         targetSdk = 37
-        versionCode = 4201
-        versionName = "4.2"
+        versionCode = 4206
+        versionName = "4.2.5"
         ndk {
             abiFilters.clear()
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
@@ -73,6 +74,7 @@ android {
     }
 
     buildFeatures {
+        resValues = true
         viewBinding = true
         buildConfig = true
         compose = true
@@ -116,6 +118,7 @@ android {
 }
 
 dependencies {
+    implementation(files("libs/camille-updater-1.0.4.aar"))
     // androidx
     implementation("androidx.core:core-ktx:1.17.0") // 1.18.0 requires minSdk 23
     implementation("androidx.recyclerview:recyclerview:1.4.0")
