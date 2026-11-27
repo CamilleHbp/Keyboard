@@ -8,7 +8,17 @@ Switch languages with the language key or a long press on the spacebar. The comb
 
 Install the APK from the [download site](https://download.camille.studio). A signed update from HellBoard preserves the input method and its settings.
 
+![The English QWERTY keyboard after entering hello with one gesture.](docs/screenshots/english-swipe.png)
+
+*Glide from H to O to enter “hello”. The suggestion strip shows alternatives.*
+
+![The French AZERTY keyboard after entering bonjour with one gesture.](docs/screenshots/french-swipe.png)
+
+*The same decoder follows the French keyboard layout.*
+
 ## Licenses and contributors
+
+The Android update checker uses the [Apache-licensed updater 1.0.5 source](https://github.com/CamilleHbp/android-updater/tree/v1.0.5).
 
 Keyboard uses [GPL version 3](LICENSE). The AOSP code carries its [Apache 2.0 license](LICENSE-Apache-2.0). The upstream icon carries [CC BY-SA 4.0](LICENSE-CC-BY-SA-4.0). Component notices and original copyright statements remain with their sources.
 
