@@ -1,24 +1,22 @@
 # Keyboard
 
-Type in French and English on Android. Enable both languages in **Languages & Layouts** to add a combined input. Each standalone language keeps its own layout, and you can choose QWERTY or AZERTY for the shared one.
+Type English and French in the same message on Android. The combined layout suggests words from both dictionaries, so you can swipe “bonjour” and then “hello” without switching languages.
 
-Keyboard began as a fork of [HeliBoard](https://github.com/HeliBorg/HeliBoard), which builds on OpenBoard and the Android Open Source Project keyboard. This project maintains the bilingual input, gesture suggestions and in-app update checks.
+[Download Keyboard for Android](https://download.camille.studio/#hellboard) · [English and French setup](docs/dual-language.md)
 
-Switch languages with the language key or a long press on the spacebar. The combined input checks words from both dictionaries. You can also change key placement, adjust the theme and back up your settings and learned words. [English and French typing](docs/dual-language.md) · [Custom layouts](layouts.md)
+<a href="docs/screenshots/bilingual-swipe.png"><img src="docs/screenshots/bilingual-swipe.png" width="390" alt="French + English AZERTY keyboard with word suggestions above the keys"></a>
 
-Install the APK from the [download site](https://download.camille.studio). A signed update from HellBoard preserves the input method and its settings.
+*The spacebar shows the active languages. Tap a suggestion above the keys to choose another word.*
 
-![The English QWERTY keyboard after entering hello with one gesture.](docs/screenshots/english-swipe.png)
+## Set up bilingual typing
 
-*Glide from H to O to enter “hello”. The suggestion strip shows alternatives.*
+1. Install Keyboard, enable it in Android’s keyboard settings and select it as your input method.
+2. Open **Languages & Layouts**, enable English and French. **French + English** appears in the language picker. It starts with QWERTY. Tap its entry to choose AZERTY. Each standalone language keeps its own layout.
+3. Enable **Glide typing**, open a text field and glide across the letters of a word. Use the language key or hold the spacebar when you want to switch to a single-language layout.
 
-![The French AZERTY keyboard after entering bonjour with one gesture.](docs/screenshots/french-swipe.png)
+You can change key placement, adjust the theme and back up your settings and learned words. A signed update over HellBoard keeps the selected input method and its settings. [Customize a layout](layouts.md)
 
-*The same decoder follows the French keyboard layout.*
-
-![Bilingual AZERTY layout with French + English on the spacebar and swipe suggestions above the keys.](docs/screenshots/bilingual-swipe.png)
-
-*On this layout you can swipe “hello” and “bonjour” without changing languages.*
+Keyboard started as a fork of [HeliBoard](https://github.com/HeliBorg/HeliBoard), which builds on OpenBoard and the Android Open Source Project keyboard. This project independently maintains the bilingual input, gesture suggestions and in-app updates.
 
 ## Licenses and contributors
 
