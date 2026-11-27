@@ -58,6 +58,7 @@ import helium314.keyboard.latin.utils.ScriptUtils
 import helium314.keyboard.latin.utils.ScriptUtils.script
 import helium314.keyboard.latin.utils.SubtypeLocaleUtils
 import helium314.keyboard.latin.utils.SubtypeLocaleUtils.displayName
+import helium314.keyboard.latin.utils.EnglishFrenchInput
 import helium314.keyboard.latin.utils.SubtypeSettings
 import helium314.keyboard.latin.utils.SubtypeUtilsAdditional
 import helium314.keyboard.latin.utils.getActivity
@@ -124,7 +125,11 @@ fun SubtypeScreen(
             setCurrentSubtype(currentSubtype.with(ExtraValue.NO_SHIFT_KEY))
     }
 
-    val availableLocalesForScript = getAvailableSecondaryLocales(ctx, currentSubtype.locale).sortedBy { it.toLanguageTag() }
+    val isCombinedInput = EnglishFrenchInput.isCombined(currentSubtype)
+    val availableLocalesForScript = getAvailableSecondaryLocales(ctx, currentSubtype.locale)
+        .filterNot { (currentSubtype.locale.language == "en" && it.language == "fr") ||
+            (currentSubtype.locale.language == "fr" && it.language == "en") }
+        .sortedBy { it.toLanguageTag() }
     var showSecondaryLocaleDialog by remember { mutableStateOf(false) }
     var showKeyOrderDialog by remember { mutableStateOf(false) }
     var showHintOrderDialog by remember { mutableStateOf(false) }
@@ -133,7 +138,7 @@ fun SubtypeScreen(
     val customMainLayouts = LayoutUtilsCustom.getLayoutFiles(LayoutType.MAIN, ctx, currentSubtype.locale).map { it.name }
     SearchScreen(
         onClickBack = onClickBack,
-        icon = { if (currentSubtype.isAdditionalSubtype(prefs)) DeleteButton {
+        icon = { if (!isCombinedInput && currentSubtype.isAdditionalSubtype(prefs)) DeleteButton {
             SubtypeUtilsAdditional.removeAdditionalSubtype(ctx, currentSubtype.toAdditionalSubtype())
             SubtypeSettings.removeEnabledSubtype(ctx, currentSubtype.toAdditionalSubtype())
             onClickBack()
@@ -151,7 +156,12 @@ fun SubtypeScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 MainLayoutRow(currentSubtype, customMainLayouts) { setCurrentSubtype(it) }
-                if (availableLocalesForScript.size > 1) {
+                if (isCombinedInput) {
+                    Text(stringResource(R.string.french_english_input_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (!isCombinedInput && availableLocalesForScript.size > 1) {
                     WithSmallTitle(stringResource(R.string.secondary_locale)) {
                         ActionRow(onClick = { showSecondaryLocaleDialog = true }) {
                             val text = getSecondaryLocales(currentSubtype.extraValues).joinToString(", ") {

@@ -89,14 +89,15 @@
     <string name="setup_welcome_additional_description">"avec la saisie gestuelle"</string>
     <string name="setup_start_action">"Commencer"</string>
     <string name="setup_steps_title">Configurer %s</string>
+    <string name="setup_progress">Étape %1$d sur 2</string>
     <string name="setup_step1_title">Activer %s</string>
-    <string name="setup_step1_instruction">Veuillez vérifier que %s est activé dans vos paramètres de langue et de saisie. Cela autorisera son fonctionnement sur votre appareil.</string>
+    <string name="setup_step1_instruction">Dans les paramètres Android, activez %s et confirmez l’avertissement concernant le clavier. Revenez ensuite ici.</string>
     <string name="setup_step1_action">"Activer le clavier dans les paramètres"</string>
     <string name="setup_step2_title">Basculer vers %s</string>
-    <string name="setup_step2_instruction">Sélectionnez ensuite « %s » comme méthode de saisie active.</string>
-    <string name="setup_step2_action">"Changer de mode de saisie"</string>
-    <string name="setup_step3_title">Félicitations, l\'opération est terminée !</string>
-    <string name="setup_step3_instruction">Avec %s, vous pouvez saisir du texte dans toutes vos applications préférées.</string>
+    <string name="setup_step2_instruction">Ouvrez la liste des claviers et sélectionnez %s.</string>
+    <string name="setup_step2_action">Choisir le clavier</string>
+    <string name="setup_step3_title">%s est prêt</string>
+    <string name="setup_step3_instruction">Ouvrez un champ de texte dans une application pour écrire avec %s.</string>
     <string name="setup_step3_action">Configurer le clavier</string>
     <string name="setup_finish_action">Terminé</string>
     <string name="show_setup_wizard_icon">"Afficher l\'icône de l\'application"</string>
@@ -134,8 +135,8 @@ Nouveau dictionnaire:
     <string name="user_dict_settings_more_languages">"Plus de langues…"</string>
     <string name="user_dict_word_already_present">Ce mot est déjà présent dans le dictionnaire utilisateur %s. Veuillez en saisir un autre.</string>
     <string name="user_dict_add_word_button">Ajouter un mot</string>
-    <string name="spell_checker_service_name">Correcteur orthographique HeliBoard</string>
-    <string name="android_spell_checker_settings">Paramètres du correcteur orthographique HeliBoard</string>
+    <string name="spell_checker_service_name">Correcteur orthographique Clavier</string>
+    <string name="android_spell_checker_settings">Paramètres du correcteur orthographique Clavier</string>
     <string name="number_row">Ligne de chiffres</string>
     <string name="delete_swipe">Balayage sur la touche Effacer</string>
     <string name="delete_swipe_summary">Glissez sur la touche de suppression pour supprimer des parties de texte en une seule fois</string>
@@ -152,7 +153,7 @@ Nouveau dictionnaire:
     <string name="checksum_mismatch_message">Fichier de bibliothèque inconnu. Êtes-vous sûr qu\'il provient d\'une source fiable et que c\'est pour \'%s\' ?</string>
     <string name="load_gesture_library_button_load">Charger bibliothèque</string>
     <string name="load_gesture_library_button_delete">Supprimer bibliothèque</string>
-    <string name="ime_settings">Paramètres d\'HeliBoard</string>
+    <string name="ime_settings">Paramètres du clavier</string>
     <string name="settings_category_input">Saisie</string>
     <string name="settings_category_correction">Corrections</string>
     <string name="settings_category_suggestions">Suggestions</string>
@@ -555,4 +556,8 @@ Nouveau dictionnaire:
     <string name="recent_emojis_cleared">Émojis récents effacés</string>
     <string name="prefs_enable_hardware_keyboard">Prise en charge du clavier physique</string>
     <string name="accent_shifted_icon">Icône de majuscule accentuée</string>
+    <string name="symbol_dial">Cadran de symboles</string>
+    <string name="symbol_dial_summary">Faites glisser le doigt vers un symbole autour de la touche, puis relevez-le pour le saisir.</string>
+    <string name="symbol_popup_delay">Délai d’affichage des symboles</string>
+    <string name="symbol_popup_instant">Instantané</string>
 </resources>

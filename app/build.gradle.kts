@@ -1,4 +1,5 @@
 import com.android.build.api.variant.ApplicationVariant
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -14,8 +15,8 @@ android {
         applicationId = "helium314.keyboard"
         minSdk = 21
         targetSdk = 37
-        versionCode = 4206
-        versionName = "4.2.5"
+        versionCode = 4214
+        versionName = "4.2.13"
         ndk {
             abiFilters.clear()
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
@@ -23,8 +24,20 @@ android {
         proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
 
+    val localSigning = rootProject.file("signing.properties")
+    if (localSigning.isFile) {
+        val credentials = Properties().apply { localSigning.inputStream().use { load(it) } }
+        signingConfigs.create("localRelease") {
+            storeFile = rootProject.file(credentials.getProperty("storeFile"))
+            storePassword = credentials.getProperty("storePassword")
+            keyAlias = credentials.getProperty("keyAlias")
+            keyPassword = credentials.getProperty("keyPassword")
+        }
+    }
+
     buildTypes {
         release {
+            if (localSigning.isFile) signingConfig = signingConfigs.getByName("localRelease")
             isMinifyEnabled = true
             isShrinkResources = false
             isDebuggable = false
@@ -67,7 +80,8 @@ android {
             }
             variant.outputs.forEach { output ->
                 if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
-                    output.outputFileName = "HeliBoard_${defaultConfig.versionName}-${variant.buildType}.apk"
+                    output.outputFileName = "keyboard-${defaultConfig.versionName}" +
+                        (if (variant.buildType == "release") "" else "-${variant.buildType}") + ".apk"
                 }
             }
         }
@@ -85,7 +99,7 @@ android {
             path = File("src/main/jni/Android.mk")
         }
     }
-    ndkVersion = "28.0.13004108"
+    ndkVersion = "29.0.14206865"
 
     packaging {
         jniLibs {
@@ -118,7 +132,7 @@ android {
 }
 
 dependencies {
-    implementation(files("libs/camille-updater-1.0.4.aar"))
+    implementation(files("libs/camille-updater-1.0.5.aar"))
     // androidx
     implementation("androidx.core:core-ktx:1.17.0") // 1.18.0 requires minSdk 23
     implementation("androidx.recyclerview:recyclerview:1.4.0")

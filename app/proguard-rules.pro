@@ -12,3 +12,6 @@
 # after upgrading to gradle 8, stack traces contain "unknown source"
 -keepattributes SourceFile,LineNumberTable
 -dontobfuscate
+
+# Registered by name in the extracted swipe engine.
+-keep class com.google.android.keyboard.client.delight5.** { *; }

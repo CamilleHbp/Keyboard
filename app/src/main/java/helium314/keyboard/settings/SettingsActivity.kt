@@ -4,6 +4,7 @@ package helium314.keyboard.settings
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -117,11 +118,11 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
                                 settingsContainer[Settings.PREF_SPELLCHECK_SUGGEST]!!.Preference()
                             }
                         }
+                    else if (showWelcomeWizard)
+                        WelcomeWizard(close = { showWelcomeWizard = false }, finish = this::finish)
                     else {
                         SettingsNavHost(onClickBack = { this.finish() })
-                        if (showWelcomeWizard) {
-                            WelcomeWizard(close = { showWelcomeWizard = false }, finish = this::finish)
-                        } else if (crashReports.isNotEmpty()) {
+                        if (crashReports.isNotEmpty()) {
                             val ctx = LocalContext.current
                             ConfirmationDialog(
                                 cancelButtonText = "ignore",
@@ -183,6 +184,10 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
     override fun onResume() {
         super.onResume()
         paused = false
+        // Settings also opens from the IME through SettingsActivity2, outside the
+        // updater's launcher-only lifecycle callback. Pre-O uses a manual web link.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            studio.camille.updater.CamilleUpdater.checkNow(this)
     }
 
     fun setForceTheme(theme: String?, night: Boolean?) {

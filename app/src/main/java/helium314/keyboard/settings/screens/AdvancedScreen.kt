@@ -61,6 +61,8 @@ fun AdvancedSettingsScreen(
     val items = listOf(
         Settings.PREF_ALWAYS_INCOGNITO_MODE,
         Settings.PREF_KEY_LONGPRESS_TIMEOUT,
+        Settings.PREF_SYMBOL_DIAL,
+        Settings.PREF_SYMBOL_POPUP_DELAY,
         Settings.PREF_SPACE_HORIZONTAL_SWIPE,
         Settings.PREF_SPACE_VERTICAL_SWIPE,
         if (Settings.readHorizontalSpaceSwipe(prefs) == KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE
@@ -112,6 +114,20 @@ fun createAdvancedSettings(context: Context) = listOf(
             default = Defaults.PREF_KEY_LONGPRESS_TIMEOUT,
             range = 100f..700f,
             description = { stringResource(R.string.abbreviation_unit_milliseconds, it.toString()) }
+        )
+    },
+    Setting(context, Settings.PREF_SYMBOL_DIAL, R.string.symbol_dial, R.string.symbol_dial_summary) {
+        SwitchPreference(it, false)
+    },
+    Setting(context, Settings.PREF_SYMBOL_POPUP_DELAY, R.string.symbol_popup_delay) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = LocalContext.current.prefs().getInt(Settings.PREF_KEY_LONGPRESS_TIMEOUT, Defaults.PREF_KEY_LONGPRESS_TIMEOUT),
+            range = 0f..700f,
+            stepSize = 10,
+            description = { if (it == 0) stringResource(R.string.symbol_popup_instant)
+                else stringResource(R.string.abbreviation_unit_milliseconds, it.toString()) }
         )
     },
     Setting(context, Settings.PREF_SPACE_HORIZONTAL_SWIPE, R.string.show_horizontal_space_swipe) {

@@ -34,7 +34,7 @@ import kotlin.jvm.functions.Function1;
  * A view that renders a virtual {@link PopupKeysKeyboard}. It handles rendering of keys and
  * detecting key presses and touch movements.
  */
-public class PopupKeysKeyboardView extends KeyboardView implements PopupKeysPanel {
+public class PopupKeysKeyboardView extends KeyboardView implements PopupKeysPanel.KeyboardPanel {
     private final int[] mCoordinates = CoordinateUtils.newInstance();
 
     private final Drawable mDivider;

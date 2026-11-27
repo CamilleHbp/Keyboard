@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="french_english_input">Français + anglais</string>
+    <string name="french_english_input_summary">%1$s · Disponible lorsque le français et l’anglais sont activés</string>
+    <string name="french_english_input_description">Écrivez et glissez en français et en anglais sur cette disposition.</string>
+</resources>

@@ -117,4 +117,8 @@ public final class JniUtils {
     public static void loadNativeLibrary() {
         // Ensures the static initializer is called
     }
+
+    public static boolean hasGestureTyping() {
+        return sHaveGestureLib || helium314.keyboard.latin.gesture.NativeSwipe.available();
+    }
 }

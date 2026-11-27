@@ -12,6 +12,7 @@ import helium314.keyboard.latin.common.LocaleUtils.constructLocale
 import helium314.keyboard.latin.define.DebugFlags
 import helium314.keyboard.latin.settings.Defaults.default
 import helium314.keyboard.latin.utils.LayoutType
+import helium314.keyboard.latin.utils.EnglishFrenchInput
 import helium314.keyboard.latin.utils.LayoutType.Companion.toExtraValue
 import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.POPUP_KEYS_ORDER_DEFAULT
@@ -72,7 +73,7 @@ data class SettingsSubtype(val locale: Locale, val extraValues: String) {
     }
 
     fun isAdditionalSubtype(prefs: SharedPreferences) =
-        prefs.getString(Settings.PREF_ADDITIONAL_SUBTYPES, Defaults.PREF_ADDITIONAL_SUBTYPES)!!
+        EnglishFrenchInput.isCombined(this) || prefs.getString(Settings.PREF_ADDITIONAL_SUBTYPES, Defaults.PREF_ADDITIONAL_SUBTYPES)!!
             .split(Separators.SETS).contains(toPref())
 
     fun isSameAsDefault() = SubtypeSettings.getResourceSubtypesForLocale(locale).any { it.toSettingsSubtype() == this.toPref().toSettingsSubtype() }

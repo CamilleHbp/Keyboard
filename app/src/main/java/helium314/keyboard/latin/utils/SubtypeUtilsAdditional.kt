@@ -28,7 +28,8 @@ object SubtypeUtilsAdditional {
     fun createAdditionalSubtype(locale: Locale, extraValue: String, isAsciiCapable: Boolean,
                                         isEmojiCapable: Boolean): InputMethodSubtype {
         val mainLayoutName = LayoutType.getMainLayoutFromExtraValue(extraValue) ?: "qwerty"
-        val nameId = getNameResId(locale, mainLayoutName)
+        val isEnglishFrench = extraValue.split(",").contains(ExtraValue.ENGLISH_FRENCH_INPUT)
+        val nameId = if (isEnglishFrench) R.string.french_english_input else getNameResId(locale, mainLayoutName)
         val fullExtraValue = extraValue + "," + getAdditionalExtraValues(locale, mainLayoutName, isAsciiCapable, isEmojiCapable)
         val subtypeId = getSubtypeId(locale, fullExtraValue, isAsciiCapable)
         val builder = InputMethodSubtypeBuilder()
@@ -43,7 +44,7 @@ object SubtypeUtilsAdditional {
             .setIsAsciiCapable(isAsciiCapable)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             builder.setLanguageTag(locale.toLanguageTag())
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && LayoutUtilsCustom.isCustomLayout(mainLayoutName))
+        if (!isEnglishFrench && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && LayoutUtilsCustom.isCustomLayout(mainLayoutName))
             builder.setSubtypeNameOverride(LayoutUtilsCustom.getDisplayName(mainLayoutName))
         return builder.build()
     }
@@ -77,11 +78,18 @@ object SubtypeUtilsAdditional {
     // updates additional subtypes, enabled subtypes, and selected subtype
     @SuppressLint("UseKtx") // easier to understand
     fun changeAdditionalSubtype(from: SettingsSubtype, to: SettingsSubtype, context: Context) {
+        if (EnglishFrenchInput.isCombined(from)) {
+            EnglishFrenchInput.update(context, from, to)
+            return
+        }
         val prefs = context.prefs()
         // read now because there may be an intermediate state where the subtype is invalid and thus removed
-        val isSelected = prefs.getString(Settings.PREF_SELECTED_SUBTYPE, Defaults.PREF_SELECTED_SUBTYPE)!!.toSettingsSubtype() == from
-        val isEnabled = prefs.getString(Settings.PREF_ENABLED_SUBTYPES, Defaults.PREF_ENABLED_SUBTYPES)!!.split(Separators.SETS)
-            .any { it.toSettingsSubtype() == from }
+        val isSelected = SubtypeSettings.getSelectedSubtype(prefs).toSettingsSubtype() == from
+        // A fresh install uses the system-language defaults without storing them in preferences.
+        // Materialize those defaults when editing one, including all other enabled layouts.
+        val enabledBefore = SubtypeSettings.getEnabledSubtypes(fallback = true)
+            .filterNot { EnglishFrenchInput.isCombined(it) }.map { it.toSettingsSubtype() }
+        val isEnabled = from in enabledBefore
         val additionalSubtypes = SubtypeSettings.createSettingsSubtypes(prefs.getString(Settings.PREF_ADDITIONAL_SUBTYPES, Defaults.PREF_ADDITIONAL_SUBTYPES)!!)
             .toMutableList()
         additionalSubtypes.remove(from)
@@ -98,8 +106,7 @@ object SubtypeUtilsAdditional {
             editor.putString(Settings.PREF_SELECTED_SUBTYPE, to.toPref())
         }
         if (isEnabled) {
-            val enabled = SubtypeSettings.createSettingsSubtypes(prefs.getString(Settings.PREF_ENABLED_SUBTYPES, Defaults.PREF_ENABLED_SUBTYPES)!!)
-                .toMutableList()
+            val enabled = enabledBefore.toMutableList()
             enabled.remove(from)
             enabled.add(to)
             editor.putString(Settings.PREF_ENABLED_SUBTYPES, SubtypeSettings.createPrefSubtypes(enabled))

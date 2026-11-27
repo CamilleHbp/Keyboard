@@ -129,6 +129,9 @@ object SubtypeLocaleUtils {
      *  [displayLocale] defaults to system locale
      */
     fun InputMethodSubtype.displayName(displayLocale: Locale? = null): String {
+        if (EnglishFrenchInput.isCombined(this)) return if (displayLocale == null)
+            resources.getString(R.string.french_english_input)
+        else runInLocale(resources, displayLocale) { resources.getString(R.string.french_english_input) }
         if (displayLocale == null) resourceSubtypeDisplayNameCache[hashCode()]?.let { return it }
 
         val layoutName = mainLayoutName()

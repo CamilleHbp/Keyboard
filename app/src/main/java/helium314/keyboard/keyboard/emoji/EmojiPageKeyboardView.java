@@ -184,7 +184,7 @@ public final class EmojiPageKeyboardView extends KeyboardView implements
     }
 
     @Nullable
-    private PopupKeysPanel showPopupKeysKeyboard(@NonNull final Key key) {
+    private PopupKeysPanel.KeyboardPanel showPopupKeysKeyboard(@NonNull final Key key) {
         mPopupKeysKeyboardView.setVisibility(GONE);
         final PopupKeySpec[] popupKeys = key.getPopupKeys();
         if (popupKeys == null) {
@@ -301,7 +301,7 @@ public final class EmojiPageKeyboardView extends KeyboardView implements
         }
 
         var descriptionPanel = showDescription(key);
-        final PopupKeysPanel popupKeysPanel = showPopupKeysKeyboard(key);
+        final PopupKeysPanel.KeyboardPanel popupKeysPanel = showPopupKeysKeyboard(key);
 
         final int x = mLastX;
         final int y = mLastY;
@@ -337,7 +337,7 @@ public final class EmojiPageKeyboardView extends KeyboardView implements
         }
     }
 
-    private PopupKeysPanel showDescription(Key key) {
+    private PopupKeysPanel.KeyboardPanel showDescription(Key key) {
         mDescriptionView.setVisibility(GONE);
         var description = mEmojiViewCallback.getDescription(key.getLabel());
         if (description == null) {

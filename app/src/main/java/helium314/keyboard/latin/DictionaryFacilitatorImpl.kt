@@ -58,6 +58,8 @@ import java.util.concurrent.TimeUnit
  */
 class DictionaryFacilitatorImpl : DictionaryFacilitator {
     private var dictionaryGroups = listOf(DictionaryGroup())
+    private val nativeSwipe = helium314.keyboard.latin.gesture.NativeSwipe()
+    private var appContext: Context? = null
 
     @Volatile
     private var mLatchForWaitingLoadingMainDictionaries = CountDownLatch(0)
@@ -138,6 +140,8 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         Log.i(TAG, "resetDictionaries, force reloading main dictionary: $forceReloadMainDictionary")
 
         val locales = getUsedLocales(newLocale, context)
+        appContext = context.applicationContext
+        helium314.keyboard.latin.gesture.NativeSwipe.prepare(context, locales.map { it.language }.distinct())
 
         val subDictTypesToUse = listOfNotNull(
             Dictionary.TYPE_USER,
@@ -486,6 +490,26 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard,
         settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int, inputStyle: Int
     ): SuggestionResults {
+        if (composedData.mIsBatchMode) {
+            val context = appContext
+            val words = context?.let { nativeSwipe.suggest(it,
+                dictionaryGroups.map { group -> group.locale.language }.distinct(),
+                keyboard, composedData, settingsValuesForSuggestion.mBlockPotentiallyOffensive,
+                inputStyle == SuggestedWords.INPUT_STYLE_TAIL_BATCH) }
+            if (words != null) {
+                val result = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS,
+                    ngramContext.isBeginningOfSentenceContext, false)
+                val source = dictionaryGroups.first().getDict(Dictionary.TYPE_MAIN)
+                    ?: Dictionary.DICTIONARY_HARDCODED
+                words.filterNot { isBlacklisted(it) }.forEachIndexed { index, word ->
+                    result.add(SuggestedWordInfo(word, "", 1_000_000 - index,
+                        SuggestedWordInfo.KIND_CORRECTION, source,
+                        SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+                }
+                result.mRawSuggestions?.addAll(result)
+                return result
+            }
+        }
         val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
         val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
 
@@ -645,7 +669,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         }
 
         private fun getUsedLocales(mainLocale: Locale, context: Context): Collection<Locale> {
-            val locales = hashSetOf(mainLocale)
+            val locales = linkedSetOf(mainLocale)
             // adding secondary locales is a bit tricky since they depend on the subtype
             // but usually this is called with the selected subtype locale
             val selectedSubtype = SubtypeSettings.getSelectedSubtype(context.prefs())

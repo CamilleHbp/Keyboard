@@ -30,6 +30,19 @@ class SubtypeTest {
     private val latinIME = Robolectric.setupService(LatinIME::class.java)
     private val params = KeyboardParams()
 
+    @Test @Config(sdk = [35], qualifiers = "en-rUS")
+    fun bilingualEditActivatesTheImplicitDefaultLayout() {
+        val prefs = latinIME.prefs()
+        prefs.edit().remove(Settings.PREF_ENABLED_SUBTYPES).remove(Settings.PREF_SELECTED_SUBTYPE).apply()
+        SubtypeSettings.reloadEnabledSubtypes(latinIME)
+        val before = SubtypeSettings.getEnabledSubtypes(fallback = true).map { it.toSettingsSubtype() }
+        val from = SubtypeSettings.getSelectedSubtype(prefs).toSettingsSubtype()
+        val to = from.with(helium314.keyboard.latin.common.Constants.Subtype.ExtraValue.SECONDARY_LOCALES, "fr")
+        SubtypeUtilsAdditional.changeAdditionalSubtype(from, to, latinIME)
+        assertEquals(to, SubtypeSettings.getSelectedSubtype(prefs).toSettingsSubtype())
+        assertEquals((before - from + to).toSet(), SubtypeSettings.getEnabledSubtypes().map { it.toSettingsSubtype() }.toSet())
+    }
+
     init {
         ShadowLog.setupLogging()
         ShadowLog.stream = System.out

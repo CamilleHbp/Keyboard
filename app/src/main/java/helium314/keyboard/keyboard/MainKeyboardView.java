@@ -485,6 +485,14 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         if (popupKeys == null) {
             return null;
         }
+        if (Settings.getValues().mSymbolDial && PointerTracker.hasSymbolPopup(key)
+                && !AccessibilityUtils.Companion.getInstance().isTouchExplorationEnabled()) {
+            SymbolDialView dial = SymbolDialView.create(this, key, mDrawingPreviewPlacerView, newLabelPaint(key), mKeyboardActionListener);
+            if (dial != null) {
+                onShowPopupKeysPanel(dial);
+                return dial;
+            }
+        }
         Keyboard popupKeysKeyboard = mPopupKeysKeyboardCache.get(key);
         if (popupKeysKeyboard == null) {
             // {@link KeyPreviewDrawParams#mPreviewVisibleWidth} should have been set at
@@ -597,6 +605,9 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
     }
 
     public boolean processMotionEvent(final MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
+            PointerTracker.dismissInstantPopups();
+        }
         final int index = event.getActionIndex();
         final int id = event.getPointerId(index);
         final PointerTracker tracker = PointerTracker.getPointerTracker(id);
@@ -744,6 +755,11 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
     private String layoutLanguageOnSpacebar(final Paint paint,
             final RichInputMethodSubtype subtype, final int width) {
         // Choose appropriate language name to fit into the width.
+
+        if (subtype.hasExtraValue(Constants.Subtype.ExtraValue.ENGLISH_FRENCH_INPUT)) {
+            final String name = getResources().getString(R.string.french_english_input);
+            return fitsTextIntoWidth(width, name, paint) ? name : "FR + EN";
+        }
 
         final List<Locale> secondaryLocales = Settings.getValues().mSecondaryLocales;
         // avoid showing same language twice

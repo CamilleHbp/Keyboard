@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="french_english_input">French + English</string>
+    <string name="french_english_input_summary">%1$s · Available while English and French are enabled</string>
+    <string name="french_english_input_description">Type and glide in French and English on this layout.</string>
+</resources>

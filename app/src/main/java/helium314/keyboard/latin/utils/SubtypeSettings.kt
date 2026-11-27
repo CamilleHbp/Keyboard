@@ -27,16 +27,21 @@ object SubtypeSettings {
     /** @return enabled subtypes. If no subtypes are enabled, but a contextForFallback is provided,
      *  subtypes for system locales will be returned, or en-US if none found. */
     fun getEnabledSubtypes(fallback: Boolean = false): List<InputMethodSubtype> {
-        val enabled = if (fallback && enabledSubtypes.isEmpty()) getDefaultEnabledSubtypes()
+        val base = if (fallback && enabledSubtypes.isEmpty()) getDefaultEnabledSubtypes()
             else enabledSubtypes
+        val enabled = withEnglishFrenchInput(base)
         return if (Settings.getValues()?.mIsLocked != true) enabled // on app start SettingsValues are null
         else enabled + SettingsSubtype.fallbackSubtype.toAdditionalSubtype()
     }
 
-    fun isEnabled(subtype: InputMethodSubtype?): Boolean = subtype in enabledSubtypes || subtype in getDefaultEnabledSubtypes()
+    fun isEnabled(subtype: InputMethodSubtype?): Boolean = subtype in getEnabledSubtypes(true)
 
     fun getAllAvailableSubtypes(): List<InputMethodSubtype> =
-        resourceSubtypesByLocale.values.flatten() + additionalSubtypes
+        resourceSubtypesByLocale.values.flatten() + getAdditionalSubtypes()
+
+    private fun withEnglishFrenchInput(subtypes: List<InputMethodSubtype>): List<InputMethodSubtype> =
+        if (EnglishFrenchInput.isAvailable(subtypes)) subtypes + listOfNotNull(englishFrenchSubtype)
+        else subtypes
 
     fun getMatchingMainLayoutNameForLocale(locale: Locale): String {
         val subtypes = resourceSubtypesByLocale.values.flatten()
@@ -56,15 +61,22 @@ object SubtypeSettings {
 
     fun addEnabledSubtype(prefs: SharedPreferences, newSubtype: InputMethodSubtype) {
         val subtype = newSubtype.toSettingsSubtype()
-        val subtypes = createSettingsSubtypes(prefs.getString(Settings.PREF_ENABLED_SUBTYPES, Defaults.PREF_ENABLED_SUBTYPES)!!) + subtype
+        val defaults = getDefaultEnabledSubtypes()
+        val keepsImplicitLanguage = enabledSubtypes.isEmpty() &&
+            newSubtype.locale().language in listOf("en", "fr") &&
+            defaults.any { it.locale().language in listOf("en", "fr") && it.locale().language != newSubtype.locale().language }
+        val base = if (keepsImplicitLanguage) defaults.map { it.toSettingsSubtype() }
+            else createSettingsSubtypes(prefs.getString(Settings.PREF_ENABLED_SUBTYPES, Defaults.PREF_ENABLED_SUBTYPES)!!)
+        val subtypes = base + subtype
         val newString = createPrefSubtypes(subtypes)
         prefs.edit { putString(Settings.PREF_ENABLED_SUBTYPES, newString) }
 
-        if (newSubtype !in enabledSubtypes) {
-            enabledSubtypes.add(newSubtype)
-            enabledSubtypes.sortBy { it.locale().toLanguageTag() } // for consistent order
-            RichInputMethodManager.getInstance().refreshSubtypeCaches()
-        }
+        enabledSubtypes.clear()
+        enabledSubtypes.addAll(subtypes.distinct().map { settings ->
+            resourceSubtypesByLocale[settings.locale]?.firstOrNull { it.toSettingsSubtype() == settings }
+                ?: settings.toAdditionalSubtype()
+        }.sortedBy { it.locale().toLanguageTag() })
+        if (RichInputMethodManager.isInitialized()) RichInputMethodManager.getInstance().refreshSubtypeCaches()
     }
 
     /** @return whether subtype was actually removed */
@@ -96,6 +108,10 @@ object SubtypeSettings {
 
     fun getSelectedSubtype(prefs: SharedPreferences): InputMethodSubtype {
         val selectedSubtype = prefs.getString(Settings.PREF_SELECTED_SUBTYPE, Defaults.PREF_SELECTED_SUBTYPE)!!.toSettingsSubtype()
+        if (EnglishFrenchInput.isCombined(selectedSubtype)) {
+            return getEnabledSubtypes(true).firstOrNull { EnglishFrenchInput.isCombined(it) }
+                ?: getEnabledSubtypes(true).first()
+        }
         if (selectedSubtype.isAdditionalSubtype(prefs) || selectedSubtype == SettingsSubtype.fallbackSubtype)
             return selectedSubtype.toAdditionalSubtype()
         // no additional subtype, must be a resource subtype
@@ -123,9 +139,11 @@ object SubtypeSettings {
         prefs.edit { putString(Settings.PREF_SELECTED_SUBTYPE, settingsSubtype.toPref()) }
     }
 
-    fun isAdditionalSubtype(subtype: InputMethodSubtype): Boolean = subtype in additionalSubtypes
+    fun isAdditionalSubtype(subtype: InputMethodSubtype): Boolean =
+        EnglishFrenchInput.isCombined(subtype) || subtype in additionalSubtypes
 
-    fun getAdditionalSubtypes(): List<InputMethodSubtype> = additionalSubtypes.toList()
+    fun getAdditionalSubtypes(): List<InputMethodSubtype> = additionalSubtypes +
+        getEnabledSubtypes(true).filter { EnglishFrenchInput.isCombined(it) }
 
     fun reloadSystemLocales(context: Context) {
         systemLocales.clear()
@@ -158,7 +176,8 @@ object SubtypeSettings {
         listOf(
             Settings.PREF_ADDITIONAL_SUBTYPES to Defaults.PREF_ADDITIONAL_SUBTYPES,
             Settings.PREF_ENABLED_SUBTYPES to Defaults.PREF_ENABLED_SUBTYPES,
-            Settings.PREF_SELECTED_SUBTYPE to Defaults.PREF_SELECTED_SUBTYPE
+            Settings.PREF_SELECTED_SUBTYPE to Defaults.PREF_SELECTED_SUBTYPE,
+            EnglishFrenchInput.PREF_SUBTYPE to EnglishFrenchInput.defaultSubtype.toPref()
         ).forEach { (key, default) ->
             val new = prefs.getString(key, default)!!.split(Separators.SETS).mapNotNullTo(mutableSetOf()) {
                 if (it.isEmpty()) return@mapNotNullTo null
@@ -188,6 +207,8 @@ object SubtypeSettings {
 
     fun reloadEnabledSubtypes(context: Context) {
         enabledSubtypes.clear()
+        EnglishFrenchInput.migrate(context.prefs())
+        englishFrenchSubtype = EnglishFrenchInput.read(context.prefs()).toAdditionalSubtype()
         loadAdditionalSubtypes(context.prefs())
         loadEnabledSubtypes(context)
         if (RichInputMethodManager.isInitialized())
@@ -211,6 +232,8 @@ object SubtypeSettings {
         reloadSystemLocales(context)
 
         loadResourceSubtypes(context.resources)
+        EnglishFrenchInput.migrate(context.prefs())
+        englishFrenchSubtype = EnglishFrenchInput.read(context.prefs()).toAdditionalSubtype()
         loadAdditionalSubtypes(context.prefs())
         loadEnabledSubtypes(context)
     }
@@ -302,6 +325,7 @@ object SubtypeSettings {
     }
 
     private val enabledSubtypes = mutableListOf<InputMethodSubtype>()
+    private var englishFrenchSubtype: InputMethodSubtype? = null
     private val resourceSubtypesByLocale = LinkedHashMap<Locale, MutableList<InputMethodSubtype>>(100)
     private val additionalSubtypes = mutableListOf<InputMethodSubtype>()
     private val systemLocales = mutableListOf<Locale>()

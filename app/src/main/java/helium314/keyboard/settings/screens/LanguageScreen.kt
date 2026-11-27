@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -21,8 +22,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import helium314.keyboard.latin.R
@@ -35,6 +38,8 @@ import helium314.keyboard.latin.common.splitOnWhitespace
 import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.settings.SettingsSubtype.Companion.toSettingsSubtype
 import helium314.keyboard.latin.utils.DictionaryInfoUtils
+import helium314.keyboard.latin.utils.EnglishFrenchInput
+import helium314.keyboard.latin.utils.mainLayoutName
 import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.MissingDictionaryDialog
 import helium314.keyboard.latin.utils.SubtypeLocaleUtils
@@ -56,11 +61,11 @@ fun LanguageScreen(
     onClickBack: () -> Unit,
 ) {
     val ctx = LocalContext.current
-    val sortedSubtypes by remember { mutableStateOf(getSortedSubtypes(ctx)) }
     val b = (LocalContext.current.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
+    val sortedSubtypes = remember(b?.value) { getSortedSubtypes(ctx) }
     if ((b?.value ?: 0) < 0)
         Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
-    val enabledSubtypes = SubtypeSettings.getEnabledSubtypes()
+    val enabledSubtypes = SubtypeSettings.getEnabledSubtypes(true)
     SearchScreen(
         onClickBack = onClickBack,
         title = {
@@ -98,7 +103,10 @@ private fun SubtypeRow(subtype: InputMethodSubtype, isEnabled: Boolean) {
         var showNoDictDialog by remember { mutableStateOf(false) }
         Column(modifier = Modifier.weight(1f)) {
             Text(subtype.displayName(), style = MaterialTheme.typography.bodyLarge)
-            val description = if (SubtypeSettings.isAdditionalSubtype(subtype)) {
+            val description = if (EnglishFrenchInput.isCombined(subtype)) {
+                stringResource(R.string.french_english_input_summary,
+                    SubtypeLocaleUtils.getMainLayoutDisplayName(subtype.mainLayoutName() ?: "qwerty") ?: "QWERTY")
+            } else if (SubtypeSettings.isAdditionalSubtype(subtype)) {
                 val secondaryLocales = subtype.getExtraValueOf(ExtraValue.SECONDARY_LOCALES)?.split(Separators.KV)
                     ?.joinToString(", ") { it.constructLocale().localizedDisplayName(ctx.resources) }
                 stringResource(R.string.custom_subtype) + (secondaryLocales?.let { "\n$it" } ?: "")
@@ -110,7 +118,9 @@ private fun SubtypeRow(subtype: InputMethodSubtype, isEnabled: Boolean) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
         }
-        Switch(
+        if (EnglishFrenchInput.isCombined(subtype)) Icon(painterResource(R.drawable.ic_arrow_back), null,
+            modifier = Modifier.padding(horizontal = 12.dp).rotate(180f))
+        else Switch(
             checked = isEnabled,
             onCheckedChange = {
                 if (it && !dictsAvailable(subtype.locale(), ctx))

@@ -89,6 +89,9 @@ public final class Constants {
             /** Language tags indicating enabled secondary locales */
             public static final String SECONDARY_LOCALES = "SecondaryLocales";
 
+            /** The separate, automatically available French + English input. */
+            public static final String ENGLISH_FRENCH_INPUT = "EnglishFrenchInput";
+
             /** Overrides the general "more popups" setting */
             public static final String MORE_POPUPS = "MorePopups";
 

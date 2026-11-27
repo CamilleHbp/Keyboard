@@ -24,7 +24,7 @@ import kotlin.jvm.functions.Function1;
 /**
  * A view that displays popup text.
  */
-public class PopupTextView extends TextView implements PopupKeysPanel {
+public class PopupTextView extends TextView implements PopupKeysPanel.KeyboardPanel {
     private final int[] mCoordinates = CoordinateUtils.newInstance();
     private Controller mController = EMPTY_CONTROLLER;
     private int mOriginX;

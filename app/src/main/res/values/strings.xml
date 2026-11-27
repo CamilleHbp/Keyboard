@@ -9,11 +9,11 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
     tools:ignore="MissingTranslation">
     <!-- Name of Android spell checker service. The app name should not be translated. -->
-    <string name="spell_checker_service_name">HeliBoard Spell Checker</string>
+    <string name="spell_checker_service_name">Keyboard Spell Checker</string>
     <!-- Title for IME settings screen. The app name should not be translated. -->
-    <string name="ime_settings">HeliBoard Settings</string>
+    <string name="ime_settings">Keyboard Settings</string>
     <!-- Title for the spell checking service settings screen. The app name should not be translated. -->
-    <string name="android_spell_checker_settings">HeliBoard Spell Checker Settings</string>
+    <string name="android_spell_checker_settings">Keyboard Spell Checker Settings</string>
     <!-- Option to provide vibrate/haptic feedback on keypress -->
     <string name="vibrate_on_keypress">Vibrate on keypress</string>
     <!-- Option to provide vibrate/haptic feedback on keypress even in do not disturb mode -->
@@ -614,25 +614,26 @@ language, hence "No language". -->
     <!-- Title of the setup wizard. %s is the application name. -->
     <string name="setup_steps_title">"Setting up %s"</string>
     <!-- Title of the 1st step in the setup wizard. %s is the application name. -->
+    <string name="setup_progress">Step %1$d of 2</string>
     <string name="setup_step1_title">"Enable %s"</string>
     <!-- Detailed instruction of the 1st step in the setup wizard. %s is the application name. -->
-    <string name="setup_step1_instruction">"Please check \"%s\" in your Languages &amp; input settings. This will authorize it to run on your device."</string>
+    <string name="setup_step1_instruction">In Android settings, turn on %s and confirm the keyboard warning. Then return here.</string>
     <!-- The label of the button that triggers the Languages & input settings in order to enable the keyboard. -->
     <string name="setup_step1_action">Enable in Settings</string>
     <!-- Title of the 2nd step in the setup wizard. %s is the application name. -->
     <string name="setup_step2_title">"Switch to %s"</string>
     <!-- Detailed instruction of the 2nd step in the setup wizard. %s is the application name. -->
-    <string name="setup_step2_instruction">"Next, select \"%s\" as your active text-input method."</string>
+    <string name="setup_step2_instruction">Open the keyboard picker and select %s.</string>
     <!-- The label of the button that triggers the choose input method dialog in order to select the keyboard. -->
-    <string name="setup_step2_action">Switch input methods</string>
+    <string name="setup_step2_action">Choose keyboard</string>
     <!-- Title of the 3rd step in the setup wizard. -->
-    <string name="setup_step3_title">"Congratulations, you're all set!"</string>
+    <string name="setup_step3_title">%s is ready</string>
     <!-- Detailed instruction of the 3rd step in the setup wizard. %s is the application name. -->
-    <string name="setup_step3_instruction">Now you can type in all your favorite apps with %s.</string>
+    <string name="setup_step3_instruction">Open a text field in any app to type with %s.</string>
     <!-- The label of the button that triggers the settings screen for the keyboard. -->
     <string name="setup_step3_action">Configure the keyboard</string>
     <!-- The label of the button that finishes the setup wizard. -->
-    <string name="setup_finish_action">Finished</string>
+    <string name="setup_finish_action">Done</string>
     <!-- Option to show setup wizard icon. Legacy setting only displayed for Android 9 and older. -->
     <string name="show_setup_wizard_icon">Show app icon</string>
     <!-- Description for the option to show setup wizard application icon of this IME in the launcher. -->
@@ -1315,4 +1316,8 @@ New dictionary:
     <string name="gesture_data_swipe_o_scope">Tool for visualizing gesture data: &lt;a href=%s&gt;Swipe-O-Scope&lt;/a&gt;</string>
 
     <!-- new strings should go above the section for gesture data gathering -->
+    <string name="symbol_dial">Symbol dial</string>
+    <string name="symbol_dial_summary">Swipe toward a symbol around the pressed key, then lift to type it.</string>
+    <string name="symbol_popup_delay">Symbol popup delay</string>
+    <string name="symbol_popup_instant">Instant</string>
 </resources>

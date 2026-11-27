@@ -47,38 +47,12 @@ public interface PopupKeysPanel {
         public void onCancelPopupKeysPanel() {}
     };
 
-    /**
-     * Initializes the layout and event handling of this {@link PopupKeysPanel} and calls the
-     * controller's onShowPopupKeysPanel to add the panel's container view.
-     *
-     * @param parentView the parent view of this {@link PopupKeysPanel}
-     * @param controller the controller that can dismiss this {@link PopupKeysPanel}
-     * @param pointX x coordinate of this {@link PopupKeysPanel}
-     * @param pointY y coordinate of this {@link PopupKeysPanel}
-     * @param listener the listener that will receive keyboard action from this
-     * {@link PopupKeysPanel}.
-     */
-    // TODO: Currently the PopupKeysPanel is inside a container view that is added to the parent.
-    // Consider the simpler approach of placing the PopupKeysPanel itself into the parent view.
-    void showPopupKeysPanel(View parentView, Controller controller, int pointX,
-                           int pointY, KeyboardActionListener listener);
-
-    /**
-     *
-     * Initializes the layout and event handling of this {@link PopupKeysPanel} and calls the
-     * controller's onShowPopupKeysPanel to add the panel's container view.
-     * Same as {@link PopupKeysPanel#showPopupKeysPanel(View, Controller, int, int, KeyboardActionListener)},
-     * but with a {@link EmojiViewCallback}.
-     *
-     * @param parentView the parent view of this {@link PopupKeysPanel}
-     * @param controller the controller that can dismiss this {@link PopupKeysPanel}
-     * @param pointX x coordinate of this {@link PopupKeysPanel}
-     * @param pointY y coordinate of this {@link PopupKeysPanel}
-     * @param onReleaseKey to receive keyboard actions from this {@link PopupKeysPanel}.
-     */
-    // TODO: Currently the PopupKeysPanel is inside a container view that is added to the parent.
-    // Consider the simpler approach of placing the PopupKeysPanel itself into the parent view.
-    void showPopupKeysPanel(View parentView, Controller controller, int pointX, int pointY, Function1<Key, Unit> onReleaseKey);
+    interface KeyboardPanel extends PopupKeysPanel {
+        void showPopupKeysPanel(View parentView, Controller controller, int pointX, int pointY,
+                KeyboardActionListener listener);
+        void showPopupKeysPanel(View parentView, Controller controller, int pointX, int pointY,
+                Function1<Key, Unit> onReleaseKey);
+    }
 
     /**
      * Dismisses the popup keys panel and calls the controller's onDismissPopupKeysPanel to remove

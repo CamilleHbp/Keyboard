@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import helium314.keyboard.accessibility.AccessibilityUtils;
 import helium314.keyboard.event.HapticEvent;
 import helium314.keyboard.keyboard.internal.BatchInputArbiter;
 import helium314.keyboard.keyboard.internal.BatchInputArbiter.BatchInputArbiterListener;
@@ -155,6 +156,9 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
 
     // the popup keys panel currently being shown. equals null if no panel is active.
     private PopupKeysPanel mPopupKeysPanel;
+    // Until the finger lifts, an instant popup can yield the original stroke to glide typing.
+    private boolean mInstantPopup;
+
 
     // true if this pointer is in the dragging finger mode.
     private boolean mIsInDraggingFinger = false;
@@ -602,6 +606,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     }
 
     private void cancelBatchInput() {
+        dismissInstantPopups();
         cancelAllPointerTrackers();
         mIsDetectingGesture = false;
         if (!sInGesture) {
@@ -698,7 +703,18 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         return (mPopupKeysPanel != null);
     }
 
+    static void dismissInstantPopups() {
+        for (PointerTracker tracker : sTrackers) {
+            if (tracker.mInstantPopup) tracker.dismissPopupKeysPanel();
+        }
+    }
+
+    static int symbolFlickThreshold() {
+        return sPointerStep;
+    }
+
     private void dismissPopupKeysPanel() {
+        mInstantPopup = false;
         if (isShowingPopupKeysPanel()) {
             mPopupKeysPanel.dismissPopupKeysPanel();
             mPopupKeysPanel = null;
@@ -734,8 +750,8 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             }
 
             startRepeatKey(key);
-            startLongPressTimer(key);
             setPressedKeyGraphics(key, eventTime);
+            startLongPressTimer(key);
             mStartX = x;
             mStartY = y;
             mStartTime = SystemClock.elapsedRealtime();
@@ -789,7 +805,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
                 x, y, mBatchInputArbiter.getElapsedTimeSinceFirstDown(eventTime));
         // If the PopupKeysPanel is showing then do not attempt to enter gesture mode. However,
         // the gestured touch points are still being recorded in case the panel is dismissed.
-        if (isShowingPopupKeysPanel()) {
+        if (isShowingPopupKeysPanel() && !mInstantPopup) {
             return;
         }
         if (!sInGesture && key != null && Character.isLetter(key.getCode())
@@ -825,6 +841,14 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             }
         }
 
+        if (mInstantPopup && mIsDetectingGesture) {
+            onGestureMoveEvent(x, y, eventTime, true, getKeyOn(x, y));
+            if (sInGesture) {
+                mCurrentKey = null;
+                return;
+            }
+            if (mIsTrackingForActionDisabled) return;
+        }
         if (isShowingPopupKeysPanel()) {
             final int translatedX = mPopupKeysPanel.translateX(x);
             final int translatedY = mPopupKeysPanel.translateY(y);
@@ -1081,6 +1105,10 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             sListener.onUpWithDeletePointerActive();
         }
 
+        if (mInstantPopup && Math.hypot(x - mKeyX, y - mKeyY) <= symbolFlickThreshold()) {
+            dismissPopupKeysPanel(); // Use normal tap handling, including autocorrection and shift.
+        }
+        mInstantPopup = false;
         if (isShowingPopupKeysPanel()) {
             if (!mIsTrackingForActionDisabled) {
                 // For KeyCode.TOGGLE_FLOATING_KEYBOARD, mPopupKeysPanel.onUpEvent will trigger a cancel MoveEvent, which will result
@@ -1185,6 +1213,10 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             return;
         }
 
+        openPopup(key);
+    }
+
+    private void openPopup(Key key) {
         setReleasedKeyGraphics(key, false);
         final PopupKeysPanel popupKeysPanel = sDrawingProxy.showPopupKeysKeyboard(key, this);
         if (popupKeysPanel == null) {
@@ -1212,6 +1244,8 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             printTouchEvent("onCancelEvt:", x, y, eventTime);
         }
 
+        // A cancelled stroke must never commit a highlighted alternative via a phantom up.
+        dismissAllPopupKeysPanels();
         cancelBatchInput();
         cancelAllPointerTrackers();
         sPointerTrackerQueue.releaseAllPointers(eventTime);
@@ -1285,9 +1319,26 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             return;
         }
 
+        if (hasSymbolPopup(key) && !AccessibilityUtils.Companion.getInstance().isTouchExplorationEnabled()) {
+            int delay = Settings.getValues().mSymbolPopupDelay;
+            if (delay > 0) {
+                sTimerProxy.startLongPressTimerOf(this, mIsInSlidingKeyInput ? delay * 3 : delay);
+                return;
+            }
+            if (!mIsInDraggingFinger && getActivePointerTrackerCount() == 1) {
+                openPopup(key);
+                mInstantPopup = isShowingPopupKeysPanel();
+                return;
+            }
+        }
         int delay = getLongPressTimeout(code);
         if (delay <= 0) return;
         sTimerProxy.startLongPressTimerOf(this, delay);
+    }
+
+    static boolean hasSymbolPopup(Key key) {
+        return key.getCode() > Constants.CODE_SPACE && key.getPopupKeys() != null
+                && !key.hasNoPanelAutoPopupKey() && !key.isRepeatable() && !key.isModifier();
     }
 
     private int getLongPressTimeout(int code) {
