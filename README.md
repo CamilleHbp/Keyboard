@@ -16,6 +16,10 @@ Install the APK from the [download site](https://download.camille.studio). A sig
 
 *The same decoder follows the French keyboard layout.*
 
+![Bilingual AZERTY layout with French + English on the spacebar and swipe suggestions above the keys.](docs/screenshots/bilingual-swipe.png)
+
+*On this layout you can swipe “hello” and “bonjour” without changing languages.*
+
 ## Licenses and contributors
 
 The Android update checker uses the [Apache-licensed updater 1.0.5 source](https://github.com/CamilleHbp/android-updater/tree/v1.0.5).
