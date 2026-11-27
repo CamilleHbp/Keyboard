@@ -2,7 +2,7 @@
 
 Type English and French in the same message on Android. The combined layout suggests words from both dictionaries, so you can swipe “bonjour” and then “hello” without switching languages.
 
-[Download Keyboard for Android](https://download.camille.studio/#hellboard) · [English and French setup](docs/dual-language.md)
+[English and French setup](docs/dual-language.md)
 
 <a href="docs/screenshots/bilingual-swipe.png"><img src="docs/screenshots/bilingual-swipe.png" width="390" alt="French + English AZERTY keyboard with word suggestions above the keys"></a>
 
